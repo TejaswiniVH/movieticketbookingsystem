@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineAdda - Registration</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <h2>CineAdda</h2>
+        <div>
+            <a href="index.html">Home</a>
+            <a href="movies.html">Movies</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+
+    <main class="login-box">
+        <h1>Create Your Account</h1>
+
+        <form id="registerForm">
+            <input type="text" id="name" placeholder="Full Name"
+                   minlength="2" required>
+
+            <input type="email" id="email"
+                   placeholder="Email Address" required>
+
+            <input type="password" id="password"
+                   placeholder="Password" minlength="6" required>
+
+            <input type="password" id="confirmPassword"
+                   placeholder="Confirm Password" required>
+
+            <button type="submit">Register</button>
+        </form>
+
+        <p id="message" class="message"></p>
+
+        <p>Already have an account?
+            <a href="login.html">Login here</a>
+        </p>
+    </main>
+
+    <script>
+        document.getElementById("registerForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim().toLowerCase();
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+            const message = document.getElementById("message");
+
+            if (password.length < 6) {
+                message.textContent = "Password must have at least 6 characters.";
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                message.textContent = "Passwords do not match.";
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem("users")) || [];
+
+            if (users.some(user => user.email.toLowerCase() === email)) {
+                message.textContent = "This email is already registered.";
+                return;
+            }
+
+            users.push({
+                name: name,
+                email: email,
+                password: password
+            });
+
+            localStorage.setItem("users", JSON.stringify(users));
+
+            alert("Registration successful!");
+            window.location.href = "login.html";
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineAdda - Your Ticket</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+    <nav class="navbar no-print">
+        <h2>CineAdda</h2>
+        <div>
+            <a href="index.html">Home</a>
+            <a href="movies.html">Movies</a>
+            <a href="history.html">My Bookings</a>
+        </div>
+    </nav>
+
+    <main class="ticket">
+        <h1>CineAdda - Movie Ticket</h1>
+        <h2 id="movie"></h2>
+
+        <div id="ticketDetails"></div>
+
+        <h3>Booking QR Code</h3>
+        <div id="qrcode"></div>
+
+        <p class="message">Enjoy your movie!</p>
+
+        <div class="no-print">
+            <button onclick="window.print()">Print Ticket</button>
+            <a class="btn secondary" href="movies.html">Book Another Movie</a>
+        </div>
+    </main>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem("loggedInUser"));
+
+        if (!user) {
+            alert("Please login first.");
+            window.location.href = "login.html";
+        }
+
+        const bookings =
+            JSON.parse(localStorage.getItem("bookingHistory")) || [];
+
+        const latestId = localStorage.getItem("latestBookingId");
+
+        const booking = bookings.find(item =>
+            String(item.id) === String(latestId) &&
+            item.userEmail === user.email
+        );
+
+        if (!booking) {
+            document.querySelector(".ticket").innerHTML =
+                "<h1>Ticket not found</h1><p>Please check your booking history.</p>";
+        } else {
+            document.getElementById("movie").textContent = booking.movie;
+
+            const details = [
+                ["Booking ID", booking.id],
+                ["Theatre", booking.theatre],
+                ["Seats", booking.seats.join(", ")],
+                ["Date", booking.date],
+                ["Show Time", booking.time],
+                ["Amount", "₹" + booking.amount],
+                ["Payment Method", booking.paymentMethod],
+                ["Payment Status", booking.paymentStatus],
+                ["Booking Status", booking.status]
+            ];
+
+            document.getElementById("ticketDetails").innerHTML =
+                details.map(([label, value]) =>
+                    `<p><b>${label}:</b> ${String(value).replace(/[&<>"']/g, ch => ({
+                        "&": "&amp;", "<": "&lt;", ">": "&gt;",
+                        '"': "&quot;", "'": "&#39;"
+                    }[ch]))}</p>`
+                ).join("");
+
+            const qrData = [
+                "CineAdda Ticket",
+                "Booking ID: " + booking.id,
+                "Movie: " + booking.movie,
+                "Theatre: " + booking.theatre,
+                "Seats: " + booking.seats.join(", "),
+                "Date: " + booking.date,
+                "Time: " + booking.time,
+                "Status: " + booking.status
+            ].join("\n");
+
+            if (window.QRCode) {
+                new QRCode(document.getElementById("qrcode"), {
+                    text: qrData,
+                    width: 180,
+                    height: 180
+                });
+            } else {
+                document.getElementById("qrcode").textContent =
+                    "QR code could not load. Check your internet connection.";
+            }
+        }
+    </script>
+
+</body>
+</html>

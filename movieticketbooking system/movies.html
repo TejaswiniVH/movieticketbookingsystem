@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineAdda - Movies</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <h2>CineAdda</h2>
+        <div>
+            <a href="index.html">Home</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="history.html">My Bookings</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+
+    <h1>Available Movies</h1>
+
+    <div class="search-box">
+        <input type="text" id="searchMovie" placeholder="Search movies...">
+    </div>
+
+    <div class="movie-container" id="movieContainer">
+
+        <div class="movie-box">
+            <img src="images/ramayana.jpg" alt="Ramayana poster">
+            <h2>Ramayana</h2>
+            <p>Epic mythological story | 2h 30min</p>
+            <button onclick="selectMovie('Ramayana')">Book Tickets</button>
+        </div>
+
+        <div class="movie-box">
+            <img src="images/premada-urali.jpg" alt="Premada Urali poster">
+            <h2>Premada Urali</h2>
+            <p>Family Drama | 2h</p>
+            <button onclick="selectMovie('Premada Urali')">Book Tickets</button>
+        </div>
+
+        <div class="movie-box">
+            <img src="images/ak47.jpg" alt="A K 47 poster">
+            <h2>A K 47</h2>
+            <p>Crime Action | 2h 15min</p>
+            <button onclick="selectMovie('A K 47')">Book Tickets</button>
+        </div>
+
+        <div class="movie-box">
+            <img src="images/og.jpg" alt="They Call Him OG poster">
+            <h2>They Call Him OG</h2>
+            <p>Action | 2h 15min</p>
+            <button onclick="selectMovie('They Call Him OG')">Book Tickets</button>
+        </div>
+
+        <div class="movie-box">
+            <img src="images/jailer2.jpg" alt="Jailer 2 poster">
+            <h2>Jailer 2</h2>
+            <p>Action | 2h 15min</p>
+            <button onclick="selectMovie('Jailer 2')">Book Tickets</button>
+        </div>
+
+        <div class="movie-box">
+            <img src="images/youth.jpg" alt="Youth poster">
+            <h2>Youth</h2>
+            <p>Romance | Comedy | 2h 15min</p>
+            <button onclick="selectMovie('Youth')">Book Tickets</button>
+        </div>
+
+        <div class="movie-box">
+            <img src="images/kd-the-devil.jpg" alt="KD The Devil poster">
+            <h2>KD The Devil</h2>
+            <p>Action | 2h 15min</p>
+            <button onclick="selectMovie('KD The Devil')">Book Tickets</button>
+        </div>
+
+        <div class="movie-box">
+            <img src="images/motu-patlu.jpg" alt="Motu Patlu poster">
+            <h2>Motu Patlu</h2>
+            <p>Animation | Comedy</p>
+            <button onclick="selectMovie('Motu Patlu')">Book Tickets</button>
+        </div>
+
+        <div class="movie-box">
+            <img src="images/doraemon.jpg" alt="Doraemon poster">
+            <h2>Doraemon</h2>
+            <p>Animation | Adventure</p>
+            <button onclick="selectMovie('Doraemon')">Book Tickets</button>
+        </div>
+
+    </div>
+
+    <script>
+        function selectMovie(movieName) {
+            const user = JSON.parse(localStorage.getItem("loggedInUser"));
+
+            if (!user) {
+                alert("Please login before booking tickets.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            localStorage.setItem("selectedMovie", movieName);
+            window.location.href = "booking.html";
+        }
+
+        document.getElementById("searchMovie").addEventListener("input", function() {
+            const search = this.value.toLowerCase();
+            const cards = document.querySelectorAll(".movie-box");
+
+            cards.forEach(card => {
+                const title = card.querySelector("h2").textContent.toLowerCase();
+                card.style.display = title.includes(search) ? "" : "none";
+            });
+        });
+    </script>
+
+</body>
+</html>

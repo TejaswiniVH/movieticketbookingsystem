@@ -1,0 +1,132 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineAdda - My Bookings</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <h2>CineAdda</h2>
+        <div>
+            <a href="index.html">Home</a>
+            <a href="movies.html">Movies</a>
+            <a href="dashboard.html">Dashboard</a>
+        </div>
+    </nav>
+
+    <main class="page-container">
+        <h1>My Booking History</h1>
+        <div id="bookingList"></div>
+    </main>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem("loggedInUser"));
+
+        if (!user) {
+            alert("Please login first.");
+            window.location.href = "login.html";
+        }
+
+        function escapeHTML(value) {
+            return String(value ?? "").replace(/[&<>"']/g, ch => ({
+                "&": "&amp;", "<": "&lt;", ">": "&gt;",
+                '"': "&quot;", "'": "&#39;"
+            }[ch]));
+        }
+
+        function displayBookings() {
+            const allBookings =
+                JSON.parse(localStorage.getItem("bookingHistory")) || [];
+
+            const userBookings = allBookings.filter(booking =>
+                booking.userEmail === user.email
+            );
+
+            const container = document.getElementById("bookingList");
+
+            if (userBookings.length === 0) {
+                container.innerHTML =
+                    '<p class="empty-state">You have not booked any tickets yet.</p>';
+                return;
+            }
+
+            container.innerHTML = "";
+
+            userBookings.slice().reverse().forEach(booking => {
+                const card = document.createElement("div");
+                card.className = "history-card";
+
+                card.innerHTML = `
+                    <h2>${escapeHTML(booking.movie)}</h2>
+                    <p><b>Booking ID:</b> ${escapeHTML(booking.id)}</p>
+                    <p><b>Theatre:</b> ${escapeHTML(booking.theatre)}</p>
+                    <p><b>Seats:</b> ${escapeHTML((booking.seats || []).join(", "))}</p>
+                    <p><b>Date:</b> ${escapeHTML(booking.date)}</p>
+                    <p><b>Time:</b> ${escapeHTML(booking.time)}</p>
+                    <p><b>Amount:</b> ₹${escapeHTML(booking.amount)}</p>
+                    <p><b>Payment:</b> ${escapeHTML(booking.paymentStatus)}</p>
+                    <p><b>Status:</b> ${escapeHTML(booking.status)}</p>
+                `;
+
+                if (booking.status !== "Cancelled") {
+                    const cancelButton = document.createElement("button");
+                    cancelButton.textContent = "Cancel Booking";
+                    cancelButton.addEventListener("click", () => {
+                        cancelBooking(booking.id);
+                    });
+                    card.appendChild(cancelButton);
+                }
+
+                container.appendChild(card);
+            });
+        }
+
+        function cancelBooking(id) {
+            if (!confirm("Are you sure you want to cancel this booking?")) {
+                return;
+            }
+
+            const bookings =
+                JSON.parse(localStorage.getItem("bookingHistory")) || [];
+
+            const booking = bookings.find(item =>
+                item.id === id && item.userEmail === user.email
+            );
+
+            if (!booking || booking.status === "Cancelled") {
+                return;
+            }
+
+            booking.status = "Cancelled";
+
+            const key = JSON.stringify([
+                booking.movie,
+                booking.theatre,
+                booking.date,
+                booking.time
+            ]);
+
+            const bookedShows =
+                JSON.parse(localStorage.getItem("bookedSeatsByShow")) || {};
+
+            const bookedSeats = bookedShows[key] || [];
+
+            bookedShows[key] = bookedSeats.filter(
+                seat => !(booking.seats || []).includes(seat)
+            );
+
+            localStorage.setItem("bookingHistory", JSON.stringify(bookings));
+            localStorage.setItem("bookedSeatsByShow", JSON.stringify(bookedShows));
+
+            displayBookings();
+        }
+
+        displayBookings();
+    </script>
+
+</body>
+</html>
