@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineAdda - Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <h2>CineAdda</h2>
+        <div>
+            <a href="index.html">Home</a>
+            <a href="movies.html">Movies</a>
+            <a href="history.html">My Bookings</a>
+            <a href="admin.html">Admin</a>
+            <a href="#" id="logout">Logout</a>
+        </div>
+    </nav>
+
+    <main>
+        <h1>Welcome to CineAdda!</h1>
+
+        <section class="login-box">
+            <h2>My Profile</h2>
+
+            <p>Name: <span id="userName"></span></p>
+            <p>Email: <span id="userEmail"></span></p>
+
+            <h2>My Bookings</h2>
+            <p>Total Bookings: <span id="bookingCount">0</span></p>
+
+            <a class="btn" href="movies.html">Book Movies</a>
+            <a class="btn secondary" href="history.html">View History</a>
+        </section>
+    </main>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem("loggedInUser"));
+
+        if (!user) {
+            alert("Please login first.");
+            window.location.href = "login.html";
+        } else {
+            document.getElementById("userName").textContent = user.name;
+            document.getElementById("userEmail").textContent = user.email;
+
+            const bookings = JSON.parse(localStorage.getItem("bookingHistory")) || [];
+
+            const userBookings = bookings.filter(booking =>
+                booking.userEmail === user.email
+            );
+
+            document.getElementById("bookingCount").textContent =
+                userBookings.length;
+        }
+
+        document.getElementById("logout").addEventListener("click", function(event) {
+            event.preventDefault();
+
+            localStorage.removeItem("loggedInUser");
+
+            alert("Logged out successfully.");
+            window.location.href = "login.html";
+        });
+    </script>
+
+</body>
+</html>

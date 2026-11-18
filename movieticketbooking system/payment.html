@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineAdda - Payment</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <h2>CineAdda</h2>
+        <div>
+            <a href="index.html">Home</a>
+            <a href="movies.html">Movies</a>
+            <a href="dashboard.html">Dashboard</a>
+        </div>
+    </nav>
+
+    <main class="login-box">
+        <h1>Payment Summary</h1>
+
+        <div class="booking-summary">
+            <p>Movie: <span id="movie"></span></p>
+            <p>Theatre: <span id="theatre"></span></p>
+            <p>Seats: <span id="seats"></span></p>
+            <p>Date: <span id="date"></span></p>
+            <p>Show Time: <span id="time"></span></p>
+            <h2>Total: ₹<span id="amount"></span></h2>
+        </div>
+
+        <label for="paymentMethod">Choose Payment Method</label>
+        <select id="paymentMethod">
+            <option value="">Select Payment Method</option>
+            <option value="Google Pay">Google Pay</option>
+            <option value="PhonePe">PhonePe</option>
+            <option value="Paytm">Paytm</option>
+            <option value="Cash">Cash</option>
+        </select>
+
+        <button id="payButton" type="button">Confirm Demo Payment</button>
+
+        <p class="message" id="message"></p>
+    </main>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem("loggedInUser"));
+
+        if (!user) {
+            alert("Please login first.");
+            window.location.href = "login.html";
+        }
+
+        const movie = localStorage.getItem("selectedMovie");
+        const theatre = localStorage.getItem("selectedTheatre");
+        const date = localStorage.getItem("showDate");
+        const time = localStorage.getItem("showTime");
+        const seats = JSON.parse(localStorage.getItem("selectedSeats")) || [];
+        const amount = Number(localStorage.getItem("totalAmount"));
+
+        if (!movie || !theatre || !date || !time ||
+            seats.length === 0 || !Number.isFinite(amount) ||
+            amount !== seats.length * 150) {
+            alert("Booking information is incomplete. Please start again.");
+            window.location.href = "movies.html";
+        }
+
+        document.getElementById("movie").textContent = movie;
+        document.getElementById("theatre").textContent = theatre;
+        document.getElementById("seats").textContent = seats.join(", ");
+        document.getElementById("date").textContent = date;
+        document.getElementById("time").textContent = time;
+        document.getElementById("amount").textContent = amount;
+
+        document.getElementById("payButton").addEventListener("click", function() {
+            const method = document.getElementById("paymentMethod").value;
+            const message = document.getElementById("message");
+
+            if (!method) {
+                message.textContent = "Please select a payment method.";
+                return;
+            }
+
+            if (!confirm("This is a demo payment. No real money will be transferred. Continue?")) {
+                return;
+            }
+
+            const showKey = JSON.stringify([movie, theatre, date, time]);
+
+            let bookedShows =
+                JSON.parse(localStorage.getItem("bookedSeatsByShow")) || {};
+
+            const alreadyBooked = bookedShows[showKey] || [];
+
+            if (seats.some(seat => alreadyBooked.includes(seat))) {
+                message.textContent =
+                    "One or more seats have already been booked. Please select again.";
+                return;
+            }
+
+            const bookings =
+                JSON.parse(localStorage.getItem("bookingHistory")) || [];
+
+            const booking = {
+                id: Date.now(),
+                userEmail: user.email,
+                movie: movie,
+                theatre: theatre,
+                seats: seats,
+                date: date,
+                time: time,
+                amount: amount,
+                paymentMethod: method,
+                paymentStatus: "Demo Successful",
+                status: "Confirmed"
+            };
+
+            bookings.push(booking);
+            bookedShows[showKey] = [...alreadyBooked, ...seats];
+
+            localStorage.setItem("bookingHistory", JSON.stringify(bookings));
+            localStorage.setItem("bookedSeatsByShow", JSON.stringify(bookedShows));
+            localStorage.setItem("latestBookingId", String(booking.id));
+
+            localStorage.removeItem("selectedSeats");
+            localStorage.removeItem("totalAmount");
+
+            window.location.href = "ticket.html";
+        });
+    </script>
+
+</body>
+</html>

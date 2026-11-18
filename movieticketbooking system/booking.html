@@ -1,0 +1,105 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineAdda - Book Tickets</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <h2>CineAdda</h2>
+        <div>
+            <a href="index.html">Home</a>
+            <a href="movies.html">Movies</a>
+            <a href="dashboard.html">Dashboard</a>
+        </div>
+    </nav>
+
+    <main class="login-box">
+        <h1>Book Your Tickets</h1>
+
+        <p><b>Selected Movie:</b> <span id="movieName"></span></p>
+
+        <form id="bookingForm">
+
+            <label for="theatre">Select Theatre</label>
+            <select id="theatre" required>
+                <option value="">Choose Theatre</option>
+                <option value="PVR Cinemas">PVR Cinemas</option>
+                <option value="INOX">INOX</option>
+                <option value="Cinepolis">Cinepolis</option>
+                <option value="Miraj Cinemas">Miraj Cinemas</option>
+                <option value="Local Theatre">Local Theatre</option>
+            </select>
+
+            <label for="showDate">Select Date</label>
+            <input type="date" id="showDate" required>
+
+            <label for="showTime">Select Show Time</label>
+            <select id="showTime" required>
+                <option value="">Choose Show Time</option>
+                <option value="10:00 AM">10:00 AM</option>
+                <option value="1:00 PM">1:00 PM</option>
+                <option value="4:00 PM">4:00 PM</option>
+                <option value="7:00 PM">7:00 PM</option>
+                <option value="10:00 PM">10:00 PM</option>
+            </select>
+
+            <button type="submit">Continue to Seats</button>
+        </form>
+    </main>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem("loggedInUser"));
+        const movie = localStorage.getItem("selectedMovie");
+
+        if (!user) {
+            alert("Please login first.");
+            window.location.href = "login.html";
+        }
+
+        if (!movie) {
+            alert("Please select a movie first.");
+            window.location.href = "movies.html";
+        }
+
+        document.getElementById("movieName").textContent = movie;
+
+        const dateInput = document.getElementById("showDate");
+        const today = new Date();
+        today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+        dateInput.min = today.toISOString().split("T")[0];
+
+        document.getElementById("bookingForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const theatre = document.getElementById("theatre").value;
+            const date = dateInput.value;
+            const time = document.getElementById("showTime").value;
+
+            if (!theatre || !date || !time) {
+                alert("Please select all booking details.");
+                return;
+            }
+
+            if (date < dateInput.min) {
+                alert("Please select today or a future date.");
+                return;
+            }
+
+            localStorage.setItem("selectedTheatre", theatre);
+            localStorage.setItem("showDate", date);
+            localStorage.setItem("showTime", time);
+
+            localStorage.removeItem("selectedSeats");
+            localStorage.removeItem("totalAmount");
+
+            window.location.href = "seats.html";
+        });
+    </script>
+
+</body>
+</html>

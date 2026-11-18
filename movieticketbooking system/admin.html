@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineAdda - Admin</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <h2>CineAdda Admin</h2>
+        <div>
+            <a href="index.html">Home</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="movies.html">Movies</a>
+        </div>
+    </nav>
+
+    <main class="page-container">
+        <h1>Admin Dashboard</h1>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3>Total Bookings</h3>
+                <p id="totalBookings">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Total Seats</h3>
+                <p id="totalSeats">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Total Revenue</h3>
+                <p>₹<span id="totalRevenue">0</span></p>
+            </div>
+        </div>
+
+        <h2>Booking Reports</h2>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Customer</th>
+                        <th>Movie</th>
+                        <th>Theatre</th>
+                        <th>Seats</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Amount</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="reportBody"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem("loggedInUser"));
+
+        if (!user) {
+            alert("Please login first.");
+            window.location.href = "login.html";
+        }
+
+        function escapeHTML(value) {
+            return String(value ?? "").replace(/[&<>"']/g, ch => ({
+                "&": "&amp;", "<": "&lt;", ">": "&gt;",
+                '"': "&quot;", "'": "&#39;"
+            }[ch]));
+        }
+
+        const bookings =
+            JSON.parse(localStorage.getItem("bookingHistory")) || [];
+
+        const activeBookings = bookings.filter(
+            booking => booking.status !== "Cancelled"
+        );
+
+        const totalSeats = activeBookings.reduce(
+            (total, booking) => total + (booking.seats || []).length, 0
+        );
+
+        const totalRevenue = activeBookings.reduce(
+            (total, booking) => total + Number(booking.amount || 0), 0
+        );
+
+        document.getElementById("totalBookings").textContent =
+            activeBookings.length;
+
+        document.getElementById("totalSeats").textContent = totalSeats;
+
+        document.getElementById("totalRevenue").textContent =
+            totalRevenue;
+
+        const reportBody = document.getElementById("reportBody");
+
+        if (bookings.length === 0) {
+            reportBody.innerHTML =
+                '<tr><td colspan="10">No bookings available.</td></tr>';
+        } else {
+            reportBody.innerHTML = bookings.map(booking => `
+                <tr>
+                    <td>${escapeHTML(booking.id)}</td>
+                    <td>${escapeHTML(booking.userEmail || "Unknown")}</td>
+                    <td>${escapeHTML(booking.movie)}</td>
+                    <td>${escapeHTML(booking.theatre)}</td>
+                    <td>${escapeHTML((booking.seats || []).join(", "))}</td>
+                    <td>${escapeHTML(booking.date)}</td>
+                    <td>${escapeHTML(booking.time)}</td>
+                    <td>₹${escapeHTML(booking.amount)}</td>
+                    <td>${escapeHTML(booking.paymentMethod)}</td>
+                    <td>${escapeHTML(booking.status)}</td>
+                </tr>
+            `).join("");
+        }
+    </script>
+
+</body>
+</html>

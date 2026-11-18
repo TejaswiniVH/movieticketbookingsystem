@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineAdda - Select Seats</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <h2>CineAdda</h2>
+        <div>
+            <a href="index.html">Home</a>
+            <a href="movies.html">Movies</a>
+            <a href="dashboard.html">Dashboard</a>
+        </div>
+    </nav>
+
+    <main class="page-container">
+        <h1>Select Your Seats</h1>
+
+        <div class="booking-summary">
+            <p><b>Movie:</b> <span id="movie"></span></p>
+            <p><b>Theatre:</b> <span id="theatre"></span></p>
+            <p><b>Date:</b> <span id="date"></span></p>
+            <p><b>Show:</b> <span id="time"></span></p>
+        </div>
+
+        <div class="screen">SCREEN THIS WAY</div>
+
+        <div class="seat-container" id="seatContainer"></div>
+
+        <div class="seat-legend">
+            <span><i class="legend-seat available"></i> Available</span>
+            <span><i class="legend-seat selected"></i> Selected</span>
+            <span><i class="legend-seat booked"></i> Booked</span>
+        </div>
+
+        <div class="booking-summary">
+            <p>Selected Seats: <span id="selectedCount">0</span></p>
+            <p>Total Amount: ₹<span id="totalAmount">0</span></p>
+            <button id="continueButton" type="button">Continue to Payment</button>
+        </div>
+    </main>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem("loggedInUser"));
+
+        if (!user) {
+            alert("Please login first.");
+            window.location.href = "login.html";
+        }
+
+        const movie = localStorage.getItem("selectedMovie");
+        const theatre = localStorage.getItem("selectedTheatre");
+        const date = localStorage.getItem("showDate");
+        const time = localStorage.getItem("showTime");
+
+        if (!movie || !theatre || !date || !time) {
+            alert("Booking details are missing. Please select your show again.");
+            window.location.href = "booking.html";
+        }
+
+        document.getElementById("movie").textContent = movie;
+        document.getElementById("theatre").textContent = theatre;
+        document.getElementById("date").textContent = date;
+        document.getElementById("time").textContent = time;
+
+        const showKey = JSON.stringify([movie, theatre, date, time]);
+
+        let bookedShows =
+            JSON.parse(localStorage.getItem("bookedSeatsByShow")) || {};
+
+        const bookedSeats = bookedShows[showKey] || [];
+        const selectedSeats = [];
+
+        const container = document.getElementById("seatContainer");
+        const seatPrice = 150;
+
+        for (let i = 1; i <= 20; i++) {
+            const seat = document.createElement("button");
+            seat.type = "button";
+            seat.textContent = "S" + i;
+            seat.className = "seat";
+
+            if (bookedSeats.includes("S" + i)) {
+                seat.classList.add("booked");
+                seat.disabled = true;
+                seat.title = "Already booked";
+            } else {
+                seat.addEventListener("click", function() {
+                    const seatNumber = "S" + i;
+
+                    if (selectedSeats.includes(seatNumber)) {
+                        selectedSeats.splice(selectedSeats.indexOf(seatNumber), 1);
+                        seat.classList.remove("selected");
+                    } else {
+                        selectedSeats.push(seatNumber);
+                        seat.classList.add("selected");
+                    }
+
+                    updateTotal();
+                });
+            }
+
+            container.appendChild(seat);
+        }
+
+        function updateTotal() {
+            document.getElementById("selectedCount").textContent =
+                selectedSeats.length;
+
+            document.getElementById("totalAmount").textContent =
+                selectedSeats.length * seatPrice;
+        }
+
+        document.getElementById("continueButton").addEventListener("click", function() {
+            if (selectedSeats.length === 0) {
+                alert("Please select at least one seat.");
+                return;
+            }
+
+            localStorage.setItem("selectedSeats", JSON.stringify(selectedSeats));
+            localStorage.setItem("totalAmount", selectedSeats.length * seatPrice);
+
+            window.location.href = "payment.html";
+        });
+    </script>
+
+</body>
+</html>
